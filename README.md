@@ -1,7 +1,7 @@
 # Whack-A-Mole-Game-Demo
 Whack-A-Mole Game Demo created using PhaserJs
 
-Play the demo here: (https://eddornelas.github.io/Whack-A-Mole-Game-Demo/)
+Play the demo here: (https://tintukrish-coder.github.io/Whack-A-Mole-Game-Demo/)
 
 ## Credits
 
