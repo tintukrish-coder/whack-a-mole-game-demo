@@ -11,5 +11,5 @@ var gameConfig = {
     sound: true,
     music: true,
   },
-  mainBackgroundColor: '011052',
+  mainBackgroundColor: '78A7FF', // Minecraft sky blue
 };

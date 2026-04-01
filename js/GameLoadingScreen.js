@@ -2,20 +2,19 @@
 MainGameContainer.GameLoadingScreen = function (game) {};
 
 MainGameContainer.GameLoadingScreen.prototype = {
-  // Game Objects or Groups
   preloadBar: undefined,
   bck: undefined,
   ready: false,
-  // Game Assets
+
   gameAssets: {
     images: [
-      { name: 'game_bg', src: './assets/img/bg.png' },
-      { name: 'mole', src: './assets/img/mole.png' },
-      { name: 'bomb', src: './assets/img/bomb.png' },
+      { name: 'game_bg', src: './assets/img/game_bg.png' },
+      { name: 'mole',    src: './assets/img/mole.png'    },
+      { name: 'bomb',    src: './assets/img/bomb.png'    },
     ],
     sounds: [
-      { name: 'confirm', src: './assets/sound/confirm.wav' },
-      { name: 'error', src: './assets/sound/error.wav' },
+      { name: 'confirm',  src: './assets/sound/confirm.wav'  },
+      { name: 'error',    src: './assets/sound/error.wav'    },
       { name: 'loadsave', src: './assets/sound/loadsave.wav' },
     ],
     music: [
@@ -23,77 +22,68 @@ MainGameContainer.GameLoadingScreen.prototype = {
     ],
     spritesheets: [],
   },
-	preload: function () {
 
-		//Show the load bar
-		this.bck = this.add.sprite(this.world.centerX, this.world.centerY, 'preloaderBackground');
-		this.bck.anchor.setTo(0.5,0.5);
-		this.bck.scale.setTo(1,1);
-		this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloaderBar');
-		this.preloadBar.anchor.setTo(0,0.5);
-		this.preloadBar.scale.setTo(1,1);
-		this.preloadBar.x = this.world.centerX - this.preloadBar.width/2;
-		
-		this.load.setPreloadSprite(this.preloadBar);
-		
-		//Start loading assets
-    
-    // load image assets
-    var x = 0;
-    var imagesn = this.gameAssets.images.length;
-    for (x=0; x<imagesn; x++) {
-      this.game.load.image(
-        this.gameAssets.images[x].name,
-        this.gameAssets.images[x].src
-      );
-    }
-    
-    // load music assets
-    var x = 0;
-    var soundsn = this.gameAssets.music.length;
-    for (x=0; x<soundsn; x++) {
-      this.game.load.audio(
-        this.gameAssets.music[x].name,
-        this.gameAssets.music[x].src
-      );
-    }
-    
-    // load sounds assets
-    var x = 0;
-    var soundsn = this.gameAssets.sounds.length;
-    for (x=0; x<soundsn; x++) {
-      this.game.load.audio(
-        this.gameAssets.sounds[x].name,
-        this.gameAssets.sounds[x].src
-      );
-    }
-    
-    // load sprite sheets
-    var x = 0;
-    var spritesheetsn = this.gameAssets.spritesheets.length;
-    for (x=0; x<spritesheetsn; x++) {
-      this.load.spritesheet(
-        this.gameAssets.spritesheets[x].name,
-        this.gameAssets.spritesheets[x].src,
-        this.gameAssets.spritesheets[x].w,
-        this.gameAssets.spritesheets[x].h,
-        this.gameAssets.spritesheets[x].frameMax,
-        this.gameAssets.spritesheets[x].m,
-        this.gameAssets.spritesheets[x].s,
-      );
-    }
-	},
+  preload: function () {
+    var cx = this.world.centerX;
+    var cy = this.world.centerY;
 
-	create: function () {
-		this.preloadBar.cropEnabled = false;
-	},
+    // Background
+    this.bck = this.add.sprite(cx, cy, 'preloaderBackground');
+    this.bck.anchor.setTo(0.5, 0.5);
 
-	update: function () {
-		if (this.ready == false)
-		{
-			this.ready = true;
-			this.state.start('GamePlay');
-		}
-	}
+    // Loading bar
+    this.preloadBar = this.add.sprite(cx, cy, 'preloaderBar');
+    this.preloadBar.anchor.setTo(0, 0.5);
+    this.preloadBar.x = cx - this.preloadBar.width / 2;
+    this.load.setPreloadSprite(this.preloadBar);
 
+    // "LOADING..." label above the bar
+    this.add.text(cx, cy - 46,
+      'LOADING...', {
+        font: '10px "Press Start 2P", monospace',
+        fill: '#55FF55',
+        stroke: '#003300',
+        strokeThickness: 2,
+        align: 'center',
+      }).anchor.setTo(0.5, 0.5);
+
+    // Title above loader
+    this.add.text(cx, cy - 90,
+      'WHACK-A-\nCREEPER', {
+        font: '16px "Press Start 2P", monospace',
+        fill: '#55FF55',
+        stroke: '#006600',
+        strokeThickness: 3,
+        align: 'center',
+      }).anchor.setTo(0.5, 0.5);
+
+    // Load all assets
+    var i, n;
+
+    n = this.gameAssets.images.length;
+    for (i = 0; i < n; i++) {
+      this.game.load.image(this.gameAssets.images[i].name, this.gameAssets.images[i].src);
+    }
+
+    n = this.gameAssets.music.length;
+    for (i = 0; i < n; i++) {
+      this.game.load.audio(this.gameAssets.music[i].name, this.gameAssets.music[i].src);
+    }
+
+    n = this.gameAssets.sounds.length;
+    for (i = 0; i < n; i++) {
+      this.game.load.audio(this.gameAssets.sounds[i].name, this.gameAssets.sounds[i].src);
+    }
+  },
+
+  create: function () {
+    this.preloadBar.cropEnabled = false;
+  },
+
+  update: function () {
+    if (!this.ready) {
+      this.ready = true;
+      this.state.start('GamePlay');
+    }
+  },
 };
