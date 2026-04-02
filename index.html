@@ -55,6 +55,7 @@
 	<script type="text/javascript">
 		var GAME_W = 360;
 		var GAME_H = 640;
+		var _game  = null;
 
 		function scaleGame() {
 			var canvas = document.querySelector('#gameContainer canvas');
@@ -70,12 +71,18 @@
 			canvas.style.transform = 'scale(' + scale + ')';
 			canvas.style.left = offsetX + 'px';
 			canvas.style.top  = offsetY + 'px';
+
+			// Tell Phaser the input scale so click coordinates map correctly
+			// to game coordinates after the CSS transform is applied.
+			if (_game && _game.input) {
+				_game.input.scale.setTo(1 / scale, 1 / scale);
+			}
 		}
 
 		window.addEventListener('resize', scaleGame);
 
 		window.onload = function() {
-			var game = new Phaser.Game(
+			_game = new Phaser.Game(
 				GAME_W,
 				GAME_H,
 				Phaser.AUTO,
@@ -84,11 +91,11 @@
 				false,
 				false
 			);
-			game.state.add('GameBoot', MainGameContainer.GameBoot);
-			game.state.add('GameLoadingScreen', MainGameContainer.GameLoadingScreen);
-			game.state.add('GamePlay', MainGameContainer.GamePlay);
+			_game.state.add('GameBoot', MainGameContainer.GameBoot);
+			_game.state.add('GameLoadingScreen', MainGameContainer.GameLoadingScreen);
+			_game.state.add('GamePlay', MainGameContainer.GamePlay);
 
-			game.state.start('GameBoot');
+			_game.state.start('GameBoot');
 
 			// Poll until Phaser creates the canvas, then apply scaling
 			var attempts = 0;
