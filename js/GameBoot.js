@@ -52,9 +52,12 @@ MainGameContainer.GameBoot.prototype = {
     // start game and configure extra things
     
     this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-		this.scale.pageAlignVertically = true;
+    this.scale.pageAlignVertically = true;
     this.scale.pageAlignHorizontally = true;
-    // this.scale.setShowAll();
+    this.scale.minWidth  = 180;
+    this.scale.minHeight = 320;
+    this.scale.maxWidth  = 1440;
+    this.scale.maxHeight = 2560;
     this.scale.refresh();
 
     this.state.start('GameLoadingScreen');
