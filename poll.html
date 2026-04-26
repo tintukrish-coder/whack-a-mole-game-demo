@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timed Poll</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #f1f5f9;
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus {
+      border-color: #6366f1;
+    }
+
+    .field { margin-bottom: 20px; }
+
+    .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+
+    .option-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .option-row input { flex: 1; }
+
+    .btn-icon {
+      background: #334155;
+      border: none;
+      border-radius: 6px;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 1.1rem;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-icon:hover { background: #ef4444; color: #fff; }
+    .btn-icon.add { background: #1e3a5f; color: #60a5fa; }
+    .btn-icon.add:hover { background: #2563eb; color: #fff; }
+
+    .duration-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .duration-row .field { flex: 1; }
+
+    .btn-primary {
+      width: 100%;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 13px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { background: #334155; color: #64748b; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      width: 100%;
+      background: transparent;
+      color: #94a3b8;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 11px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      margin-top: 10px;
+    }
+
+    .btn-secondary:hover { background: #1e293b; color: #e2e8f0; }
+
+    /* Timer */
+    .timer-ring {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .timer-ring svg { transform: rotate(-90deg); }
+
+    .timer-ring circle {
+      fill: none;
+      stroke-width: 6;
+    }
+
+    .timer-track { stroke: #1e293b; }
+    .timer-fill { stroke: #6366f1; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+    .timer-fill.urgent { stroke: #ef4444; }
+
+    .timer-label {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-top: -74px;
+      letter-spacing: -1px;
+    }
+
+    .timer-sub {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 72px;
+    }
+
+    /* Poll question */
+    .poll-question {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Vote options */
+    .vote-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+
+    .vote-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+
+    .vote-option:hover { border-color: #6366f1; background: #1a2540; }
+    .vote-option.selected { border-color: #6366f1; background: #1e2a5e; }
+    .vote-option input[type="radio"] { display: none; }
+
+    .radio-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s;
+    }
+
+    .vote-option.selected .radio-dot { border-color: #6366f1; }
+
+    .radio-dot::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #6366f1;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .vote-option.selected .radio-dot::after { opacity: 1; }
+
+    .vote-option-label { font-size: 0.95rem; color: #e2e8f0; }
+
+    /* Results */
+    .result-bars { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+
+    .result-bar-row { display: flex; flex-direction: column; gap: 6px; }
+
+    .result-bar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: #cbd5e1;
+    }
+
+    .result-bar-track {
+      height: 12px;
+      background: #0f172a;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .result-bar-fill {
+      height: 100%;
+      background: #6366f1;
+      border-radius: 99px;
+      transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1);
+      width: 0;
+    }
+
+    .result-bar-fill.winner { background: #10b981; }
+
+    .total-votes {
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .voted-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #14532d;
+      color: #4ade80;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      margin-bottom: 20px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 20px;
+    }
+
+    .status-badge.live {
+      background: #1e3a2f;
+      color: #34d399;
+    }
+
+    .status-badge.live::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #34d399;
+      border-radius: 50%;
+      animation: pulse 1.2s infinite;
+    }
+
+    .status-badge.ended {
+      background: #3b1f2b;
+      color: #f87171;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- ── SETUP VIEW ── -->
+    <div id="view-setup">
+      <h1>Create a Poll</h1>
+      <p class="subtitle">Set a question, options, and how long the poll runs before results are revealed.</p>
+
+      <div class="field">
+        <label for="poll-question">Question</label>
+        <input type="text" id="poll-question" placeholder="What do you want to ask?" maxlength="200" />
+      </div>
+
+      <div class="field">
+        <label>Options</label>
+        <div class="options-list" id="options-list"></div>
+        <button class="btn-icon add" id="btn-add-option" title="Add option">+</button>
+      </div>
+
+      <div class="duration-row">
+        <div class="field">
+          <label for="duration-min">Minutes</label>
+          <input type="number" id="duration-min" min="0" max="60" value="1" />
+        </div>
+        <div class="field">
+          <label for="duration-sec">Seconds</label>
+          <input type="number" id="duration-sec" min="0" max="59" value="0" />
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btn-start">Start Poll</button>
+    </div>
+
+    <!-- ── VOTE VIEW ── -->
+    <div id="view-vote" class="hidden">
+      <span class="status-badge live" id="live-badge">LIVE</span>
+
+      <div class="timer-ring">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle class="timer-track" cx="48" cy="48" r="42" />
+          <circle class="timer-fill" id="timer-arc" cx="48" cy="48" r="42"
+            stroke-dasharray="263.9" stroke-dashoffset="0" />
+        </svg>
+        <div class="timer-label" id="timer-display">--:--</div>
+        <div class="timer-sub">remaining</div>
+      </div>
+
+      <div class="poll-question" id="vote-question"></div>
+
+      <div class="vote-options" id="vote-options-list"></div>
+
+      <div id="voted-indicator" class="hidden">
+        <span class="voted-badge">&#10003; Vote recorded</span>
+      </div>
+
+      <button class="btn-primary" id="btn-vote">Submit Vote</button>
+      <button class="btn-secondary" id="btn-reset-setup">&#8592; New Poll</button>
+    </div>
+
+    <!-- ── RESULTS VIEW ── -->
+    <div id="view-results" class="hidden">
+      <span class="status-badge ended">ENDED</span>
+
+      <div class="poll-question" id="results-question"></div>
+
+      <div class="result-bars" id="result-bars"></div>
+      <div class="total-votes" id="total-votes-label"></div>
+
+      <button class="btn-primary" id="btn-new-poll">Start a New Poll</button>
+    </div>
+
+  </div>
+
+  <script src="./js/poll.js"></script>
+</body>
+</html>
